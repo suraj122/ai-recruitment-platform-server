@@ -89,6 +89,7 @@ router.post("/forgot-password", async (req, res) => {
   }
 });
 
+// Reset Password Endpoint
 router.post("/reset-password/:token", async (req, res) => {
   const { token } = req.params;
   const { userPassword } = req.body;
@@ -107,4 +108,27 @@ router.post("/reset-password/:token", async (req, res) => {
   }
 });
 
+// Verify User
+const verifyUser = async (req, res, next) => {
+  try {
+    const token = req.cookies.token;
+    if (!token) {
+      return res.json({ status: false, message: "Token not found" });
+    }
+    const decoded = await jwt.verify(token, process.env.KEY);
+    next();
+  } catch (error) {
+    console.log(error);
+  }
+};
+router.get("/verify", verifyUser, (req, res) => {
+  return res.json({ status: true, message: "Authorized" });
+});
+
+// Logout
+
+router.get("/logout", (req, res) => {
+  res.clearCookie("token");
+  return res.json({ status: true });
+});
 export { router as UserRouter };
